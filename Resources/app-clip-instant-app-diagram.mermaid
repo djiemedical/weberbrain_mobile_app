@@ -1,0 +1,35 @@
+sequenceDiagram
+    participant User
+    participant NFC Tag
+    participant iOS System
+    participant Android System
+    participant App Clip
+    participant Instant App
+    participant Full App (iOS)
+    participant Full App (Android)
+    participant App Store
+    participant Play Store
+
+    User->>NFC Tag: Taps NFC Tag
+    NFC Tag->>iOS System: Sends URL (iOS)
+    NFC Tag->>Android System: Sends URL (Android)
+    
+    par iOS
+        iOS System->>App Clip: Launches App Clip
+        App Clip->>App Clip: Checks if Full App is installed
+        alt Full App is installed (iOS)
+            App Clip->>Full App (iOS): Opens Full App
+        else Full App is not installed (iOS)
+            App Clip->>App Store: Redirects to App Store
+            App Store->>User: Prompts to install Full App (iOS)
+        end
+    and Android
+        Android System->>Instant App: Launches Instant App
+        Instant App->>Instant App: Checks if Full App is installed
+        alt Full App is installed (Android)
+            Instant App->>Full App (Android): Opens Full App
+        else Full App is not installed (Android)
+            Instant App->>Play Store: Redirects to Play Store
+            Play Store->>User: Prompts to install Full App (Android)
+        end
+    end
