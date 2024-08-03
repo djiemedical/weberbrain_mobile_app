@@ -1,0 +1,88 @@
+graph TD
+    subgraph "Presentation Layer"
+        A[User Interface]
+        B[Flutter Widgets]
+        C[Custom UI Components]
+    end
+
+    subgraph "Business Logic Layer"
+        D[Flutter BLoC]
+        E[Use Cases]
+    end
+
+    subgraph "Domain Layer"
+        F[Business Entities]
+        G[Repository Interfaces]
+    end
+
+    subgraph "Data Layer"
+        H[Remote Data Source]
+        I[Local Data Source]
+        J[Repository Implementations]
+        V[Hive Database]
+    end
+
+    subgraph "Device Communication Layer"
+        K[BLE Service]
+        L[Command Protocols]
+    end
+
+    subgraph "Security Layer"
+        W[flutter_secure_storage]
+        X[Custom Encryption Layer]
+        Y[Biometric Authentication]
+        Z[Certificate Pinning]
+    end
+
+    subgraph "Key Components"
+        M[BLE Manager]
+        N[Treatment Controller]
+        O[Schedule Manager]
+        P[Program Manager]
+        Q[Session History]
+        R[Firmware Update Service]
+        S[API Client]
+        T[Authentication Manager]
+    end
+
+    A --> B
+    A --> C
+    B --> D
+    C --> D
+    D --> E
+    E --> F
+    E --> G
+    G --> J
+    H --> J
+    I --> J
+    J --> E
+    K --> L
+    L --> M
+    M --> E
+    N --> E
+    O --> E
+    P --> E
+    Q --> E
+    R --> E
+    S --> H
+    T --> E
+
+    I --> V
+    J --> V
+
+    W --> X
+    X --> I
+    Y --> A
+    Z --> S
+
+    M -.-> K
+    S -.-> H
+    T -.-> W
+
+    classDef layerStyle fill:#f9f,stroke:#333,stroke-width:2px;
+    class A,B,C layerStyle;
+    class D,E layerStyle;
+    class F,G layerStyle;
+    class H,I,J,V layerStyle;
+    class K,L layerStyle;
+    class W,X,Y,Z layerStyle;
