@@ -1,0 +1,1 @@
+The Weber Brain Application mobile app will serve as a user-friendly interface for controlling Weber Brain Device Controller and the connected modules. The app will be developed using Flutter for cross-platform compatibility (iOS and Android) and will incorporate Bluetooth Low Energy (BLE) for device communication and control.
