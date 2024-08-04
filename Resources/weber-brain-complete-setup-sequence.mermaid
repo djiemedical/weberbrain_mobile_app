@@ -1,0 +1,66 @@
+sequenceDiagram
+    actor User
+    participant Device as Weber Device
+    participant OS as Mobile OS
+    participant Store as App Store
+    participant App as Weber Brain App
+    participant NFC as NFC Manager
+    participant BLE as BLE Manager
+    participant DB as Local Database
+    participant API as Backend API
+    participant UI226 as Model 226 UI
+    participant UI678 as Model 678 UI
+
+    User->>Device: Initial Tap (NFC)
+    Device->>OS: Send NFC Payload (App Store URL)
+    OS->>Store: Open App Store Page
+
+    alt App Not Installed
+        Store->>User: Display App Info
+        User->>Store: Install App
+        Store->>OS: Install Weber Brain App
+    else App Already Installed
+        Store->>OS: Open Weber Brain App
+    end
+
+    OS->>App: Launch Weber Brain App
+    App->>User: Display Welcome/Login Screen
+    User->>App: Sign Up or Log In
+    App->>DB: Store User Credentials
+
+    App->>User: Prompt to Register Device
+    User->>App: Initiate Device Registration
+    App->>NFC: Activate NFC Scanner
+    App->>User: Instruct to Tap Device Again
+
+    User->>Device: Second Tap (NFC)
+    Device->>NFC: Send Device Registration Data (incl. Serial Number)
+    NFC->>App: Receive Device Data
+
+    App->>API: Verify Serial Number
+    API->>API: Check Serial Number in Database
+    alt Serial Number Valid
+        API-->>App: Confirm Valid Serial & Model (226 or 678)
+        App->>BLE: Initiate BLE Pairing with Device Data
+        BLE->>Device: Establish Secure Connection
+        Device-->>BLE: Confirm Connection
+        BLE-->>App: Pairing Successful
+
+        App->>Device: Request Additional Device Info
+        Device-->>App: Send Full Device Info
+        App->>DB: Store Complete Device Info
+
+        alt Model 226
+            App->>UI226: Activate Model 226 UI
+            UI226->>User: Display 226-Specific Dashboard
+        else Model 678
+            App->>UI678: Activate Model 678 UI
+            UI678->>User: Display 678-Specific Dashboard
+        end
+
+        App->>User: Show Model-Specific Tutorial
+    else Serial Number Invalid
+        API-->>App: Report Invalid Serial Number
+        App->>User: Display Error: Invalid Device
+        App->>User: Prompt to Contact Support or Retry
+    end
