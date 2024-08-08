@@ -1,4 +1,4 @@
-# Flutter UI/UX Development Guidelines
+# Weber Brain UI/UX Development Guidelines
 
 ## 1. Design System
 - [ ] Establish a consistent color scheme
