@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-weberbrain-dev-3c9e4-authRole",
+      "UnauthRoleArn": "arn:aws:iam::021891571472:role/amplify-weberbrain-dev-3c9e4-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::021891571472:role/amplify-weberbrain-dev-3c9e4-authRole",
+      "Region": "ap-southeast-1",
+      "DeploymentBucketName": "amplify-weberbrain-dev-3c9e4-deployment",
+      "UnauthRoleName": "amplify-weberbrain-dev-3c9e4-unauthRole",
+      "StackName": "amplify-weberbrain-dev-3c9e4",
+      "StackId": "arn:aws:cloudformation:ap-southeast-1:021891571472:stack/amplify-weberbrain-dev-3c9e4/e596d450-5595-11ef-a031-02464109dd67",
+      "AmplifyAppId": "d16eay4a31feql"
+    },
+    "categories": {
+      "auth": {
+        "weberbrain9ec6eb8a": {}
+      }
+    }
+  }
+}
