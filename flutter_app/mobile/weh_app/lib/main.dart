@@ -7,10 +7,12 @@ import 'amplifyconfiguration.dart';
 import 'dart:math';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -45,15 +47,17 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: _amplifyConfigured ? SplashScreen() : LoadingPage(),
+      home: _amplifyConfigured ? const SplashScreen() : const LoadingPage(),
     );
   }
 }
 
 class LoadingPage extends StatelessWidget {
+  const LoadingPage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
         child: CircularProgressIndicator(),
       ),
@@ -62,6 +66,8 @@ class LoadingPage extends StatelessWidget {
 }
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -89,19 +95,19 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _navigateToAuth() {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => AuthPage()),
+      MaterialPageRoute(builder: (_) => const AuthPage()),
     );
   }
 
   void _navigateToMyDevices() {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => MyDevicesPage()),
+      MaterialPageRoute(builder: (_) => const MyDevicesPage()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -117,6 +123,8 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 
 class AuthPage extends StatefulWidget {
+  const AuthPage({super.key});
+
   @override
   _AuthPageState createState() => _AuthPageState();
 }
@@ -130,7 +138,7 @@ class _AuthPageState extends State<AuthPage> {
   bool _isVerifying = false;
   bool _isResettingPassword = false;
   bool _isLoading = false;
-  final _storage = FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage();
 
   void _toggleAuthMode() {
     setState(() {
@@ -143,13 +151,13 @@ class _AuthPageState extends State<AuthPage> {
   bool _validateInputs() {
     if (!EmailValidator.validate(_emailController.text.trim())) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter a valid email address.')),
+        const SnackBar(content: Text('Please enter a valid email address.')),
       );
       return false;
     }
     if (_passwordController.text.length < 8) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Password must be at least 8 characters long.')),
+        const SnackBar(content: Text('Password must be at least 8 characters long.')),
       );
       return false;
     }
@@ -180,12 +188,12 @@ class _AuthPageState extends State<AuthPage> {
 
       if (result.isSignUpComplete) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
               content: Text('Sign up successful. Please verify your account.')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please confirm your sign up.')),
+          const SnackBar(content: Text('Please confirm your sign up.')),
         );
       }
     } on AuthException catch (e) {
@@ -194,7 +202,7 @@ class _AuthPageState extends State<AuthPage> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
             content: Text('An unexpected error occurred. Please try again.')),
       );
     } finally {
@@ -212,7 +220,7 @@ class _AuthPageState extends State<AuthPage> {
 
       if (result.isSignUpComplete) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
               content:
                   Text('Account verified successfully. You can now sign in.')),
         );
@@ -236,7 +244,7 @@ class _AuthPageState extends State<AuthPage> {
       await Amplify.Auth.resendSignUpCode(
           username: _emailController.text.trim());
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
             content:
                 Text('Verification code resent. Please check your email.')),
       );
@@ -264,7 +272,7 @@ class _AuthPageState extends State<AuthPage> {
         await _storage.write(
             key: 'user_email', value: _emailController.text.trim());
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => MyDevicesPage()));
+            context, MaterialPageRoute(builder: (context) => const MyDevicesPage()));
       }
     } on AuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -284,7 +292,7 @@ class _AuthPageState extends State<AuthPage> {
   Future<void> _resetPassword() async {
     if (!EmailValidator.validate(_resetPasswordController.text.trim())) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter a valid email address.')),
+        const SnackBar(content: Text('Please enter a valid email address.')),
       );
       return;
     }
@@ -295,7 +303,7 @@ class _AuthPageState extends State<AuthPage> {
         username: _resetPasswordController.text.trim(),
       );
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
             content: Text('Password reset instructions sent to your email.')),
       );
       setState(() {
@@ -319,25 +327,25 @@ class _AuthPageState extends State<AuthPage> {
             : (_isVerifying ? 'Verify Account' : 'Sign Up')),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (!_isVerifying && !_isResettingPassword) ...[
                     TextField(
                       controller: _emailController,
-                      decoration: InputDecoration(labelText: 'Email'),
+                      decoration: const InputDecoration(labelText: 'Email'),
                       keyboardType: TextInputType.emailAddress,
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     TextField(
                       controller: _passwordController,
-                      decoration: InputDecoration(labelText: 'Password'),
+                      decoration: const InputDecoration(labelText: 'Password'),
                       obscureText: true,
                     ),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: _isSignIn ? _signIn : _signUp,
                       child: Text(_isSignIn ? 'Sign In' : 'Sign Up'),
@@ -351,36 +359,36 @@ class _AuthPageState extends State<AuthPage> {
                     if (_isSignIn)
                       TextButton(
                         onPressed: _showForgotPasswordDialog,
-                        child: Text('Forgot Password?'),
+                        child: const Text('Forgot Password?'),
                       ),
                   ] else if (_isVerifying) ...[
-                    Text('A verification code has been sent to your email.'),
-                    SizedBox(height: 16),
+                    const Text('A verification code has been sent to your email.'),
+                    const SizedBox(height: 16),
                     TextField(
                       controller: _verificationCodeController,
                       decoration:
-                          InputDecoration(labelText: 'Verification Code'),
+                          const InputDecoration(labelText: 'Verification Code'),
                       keyboardType: TextInputType.number,
                     ),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: _confirmSignUp,
-                      child: Text('Verify Account'),
+                      child: const Text('Verify Account'),
                     ),
                     TextButton(
                       onPressed: _resendCode,
-                      child: Text('Resend verification code'),
+                      child: const Text('Resend verification code'),
                     ),
                   ] else if (_isResettingPassword) ...[
                     TextField(
                       controller: _resetPasswordController,
-                      decoration: InputDecoration(labelText: 'Email'),
+                      decoration: const InputDecoration(labelText: 'Email'),
                       keyboardType: TextInputType.emailAddress,
                     ),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: _resetPassword,
-                      child: Text('Reset Password'),
+                      child: const Text('Reset Password'),
                     ),
                     TextButton(
                       onPressed: () {
@@ -388,7 +396,7 @@ class _AuthPageState extends State<AuthPage> {
                           _isResettingPassword = false;
                         });
                       },
-                      child: Text('Back to Sign In'),
+                      child: const Text('Back to Sign In'),
                     ),
                   ],
                 ],
@@ -399,6 +407,8 @@ class _AuthPageState extends State<AuthPage> {
 }
 
 class MyDevicesPage extends StatefulWidget {
+  const MyDevicesPage({super.key});
+
   @override
   _MyDevicesPageState createState() => _MyDevicesPageState();
 }
@@ -459,7 +469,7 @@ class _MyDevicesPageState extends State<MyDevicesPage> {
     try {
       await Amplify.Auth.signOut();
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => AuthPage()));
+          context, MaterialPageRoute(builder: (context) => const AuthPage()));
     } on AuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error signing out: ${e.message}')),
@@ -470,7 +480,7 @@ class _MyDevicesPageState extends State<MyDevicesPage> {
   Widget _buildDeviceList(List<String> devices, bool isPaired) {
     return ListView.builder(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: devices.length,
       itemBuilder: (context, index) {
         return ListTile(
@@ -494,7 +504,7 @@ class _MyDevicesPageState extends State<MyDevicesPage> {
   }
 
   Future<void> _handleRefresh() async {
-    await Future.delayed(Duration(seconds: 1)); // Simulate network delay
+    await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
     if (mounted) {
       _generateDummyDevices();
     }
@@ -504,10 +514,10 @@ class _MyDevicesPageState extends State<MyDevicesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Devices'),
+        title: const Text('My Devices'),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: _signOut,
           ),
         ],
@@ -515,22 +525,22 @@ class _MyDevicesPageState extends State<MyDevicesPage> {
       body: RefreshIndicator(
         onRefresh: _handleRefresh,
         child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(),
           child: Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Unpaired Devices',
+                const Text('Unpaired Devices',
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 _buildDeviceList(unpairedDevices, false),
-                SizedBox(height: 24),
-                Text('Paired Devices',
+                const SizedBox(height: 24),
+                const Text('Paired Devices',
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 _buildDeviceList(pairedDevices, true),
               ],
             ),
