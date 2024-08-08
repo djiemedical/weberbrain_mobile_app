@@ -1,0 +1,167 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation template for Weber Brain API Gateway and Lambda'
+
+Parameters:
+  LambdaFunctionName:
+    Type: String
+    Default: WeberBrainFunction
+  ApiGatewayName:
+    Type: String
+    Default: WeberBrainAPI
+  DynamoDBTableName:
+    Type: String
+    Default: weh_users
+  S3BucketName:
+    Type: String
+    Default: weberbrain-assets
+  S3KeyName:
+    Type: String
+    Default: lambda_dependencies.zip
+  CognitoUserPoolId:
+    Type: String
+    Description: The ID of your Cognito User Pool
+  CognitoAppClientId:
+    Type: String
+    Description: The ID of your Cognito App Client
+
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Scan
+                  - dynamodb:Query
+                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DynamoDBTableName}'
+
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref LambdaFunctionName
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          import os
+          from fastapi import FastAPI, HTTPException, Depends
+          from fastapi.security import OAuth2PasswordBearer
+          from mangum import Mangum
+          import boto3
+          from botocore.exceptions import ClientError
+
+          app = FastAPI()
+          oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+          # Initialize DynamoDB client
+          dynamodb = boto3.resource('dynamodb')
+          table = dynamodb.Table(os.environ.get('DYNAMODB_TABLE_NAME', 'weh_users'))
+
+          @app.get("/")
+          async def root():
+              return {"message": "Welcome to Weber Brain API"}
+
+          @app.get("/users/{user_id}")
+          async def read_user(user_id: str, token: str = Depends(oauth2_scheme)):
+              try:
+                  response = table.get_item(Key={'userId': user_id})
+              except ClientError as e:
+                  raise HTTPException(status_code=500, detail=str(e))
+              
+              item = response.get('Item')
+              if not item:
+                  raise HTTPException(status_code=404, detail="User not found")
+              
+              return item
+
+          @app.post("/users")
+          async def create_user(user_data: dict, token: str = Depends(oauth2_scheme)):
+              try:
+                  table.put_item(Item=user_data)
+              except ClientError as e:
+                  raise HTTPException(status_code=500, detail=str(e))
+              
+              return {"message": "User created successfully", "userId": user_data.get('userId')}
+
+          # Wrap the FastAPI app with Mangum for AWS Lambda compatibility
+          handler = Mangum(app)
+      Runtime: python3.9
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_NAME: !Ref DynamoDBTableName
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_APP_CLIENT_ID: !Ref CognitoAppClientId
+      Layers:
+        - !Ref LambdaDependenciesLayer
+
+  LambdaDependenciesLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleRuntimes:
+        - python3.9
+      Content:
+        S3Bucket: !Ref S3BucketName
+        S3Key: !Ref S3KeyName
+      Description: Dependencies for Weber Brain Lambda function
+      LayerName: WeberBrainDependencies
+
+  ApiGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Ref ApiGatewayName
+
+  ApiGatewayRootMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !GetAtt ApiGateway.RootResourceId
+      HttpMethod: ANY
+      AuthorizationType: NONE
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub 
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt LambdaFunction.Arn
+
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: ApiGatewayRootMethod
+    Properties:
+      RestApiId: !Ref ApiGateway
+      StageName: prod
+
+  LambdaApiGatewayInvoke:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt LambdaFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/ANY/
+
+Outputs:
+  LambdaFunctionArn:
+    Description: ARN of the Lambda function
+    Value: !GetAtt LambdaFunction.Arn
+  ApiGatewayUrl:
+    Description: URL of the API Gateway endpoint
+    Value: !Sub https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod/

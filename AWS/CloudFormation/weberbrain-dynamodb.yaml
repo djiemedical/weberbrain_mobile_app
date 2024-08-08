@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation template for Weber Brain DynamoDB Table'
+
+Parameters:
+  TableName:
+    Type: String
+    Default: weh_users
+    Description: Name of the DynamoDB table
+
+Resources:
+  WeberBrainTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref TableName
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+
+Outputs:
+  TableName:
+    Description: Name of the DynamoDB table
+    Value: !Ref WeberBrainTable
+  TableArn:
+    Description: ARN of the DynamoDB table
+    Value: !GetAtt WeberBrainTable.Arn
